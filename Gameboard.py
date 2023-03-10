@@ -3,11 +3,29 @@ import subprocess
 
 """ this is our gameboard
 
+         X | O | X 
      X | O | X 
-    ---+---+---
+         X | O | X 
      X | O | X 
-    ---+---+---
+         X | O | X 
+        ---+---+---
+         X | O | X 
+     X | O | X 
+         X | O | X 
+     X | O | X 
+         X | O | X 
+        ---+---+---
+         O | O | X      
      O | O | X      
+         O | O | X      
+     O | O | X      
+         O | O | X      
+
+
+ todo:
+   a cell can not marked twice
+   1 player vs computer.
+   error when input invalid letter   
 
 """
 
@@ -85,7 +103,34 @@ class Gameboard:
 
     
     def checkIfAnybodyWin(self):
-        return self.row1.win() or self.row2.win() or self.row3.win()
+        return self.row1.win() or self.row2.win() or self.row3.win() or self.sameC1() or self.sameC2() or self.sameC3() or self.diagonalWin() or self.diagonalWin2()
+    
+    def sameC1(self) :
+        return (self.row1.cell1.isNotEmpty()) and (self.row1.cell1.mark == self.row2.cell1.mark) and (self.row2.cell1.mark == self.row3.cell1.mark)
+
+    def sameC2(self) :
+        return (self.row1.cell2.isNotEmpty()) and (self.row1.cell2.mark == self.row2.cell2.mark) and (self.row2.cell2.mark == self.row3.cell2.mark)
+        
+    def sameC3(self) :
+        return (self.row1.cell3.isNotEmpty()) and (self.row1.cell3.mark == self.row2.cell3.mark) and (self.row2.cell3.mark == self.row3.cell3.mark)
+    
+
+    #  .is marked  
+    # r1.c1 == r2.c2 
+    # r2.c2 == r3.c3
+
+    def diagonalWin(self):
+        return (self.row1.cell1.isNotEmpty()) and (self.row1.cell1.mark == self.row2.cell2.mark) and (self.row2.cell2.mark == self.row3.cell3.mark)
+    
+    
+    # conditions?
+    # r1.c3 == r2.c2 == r3.c1 is marked
+    # all is marked 
+    # r1.c3 == r2.c2
+    # r2.c2 == r3.c1
+    #
+    def diagonalWin2(self):
+        return (self.row1.cell3.isNotEmpty()) and (self.row1.cell3.mark == self.row2.cell2.mark) and (self.row2.cell2.mark == self.row3.cell1.mark)
         
 
     def setPlayers(number):
