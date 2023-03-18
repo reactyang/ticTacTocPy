@@ -3,29 +3,18 @@ import subprocess
 
 """ this is our gameboard
 
-         X | O | X 
-     X | O | X 
-         X | O | X 
-     X | O | X 
-         X | O | X 
-        ---+---+---
-         X | O | X 
-     X | O | X 
-         X | O | X 
-     X | O | X 
-         X | O | X 
-        ---+---+---
-         O | O | X      
-     O | O | X      
-         O | O | X      
-     O | O | X      
-         O | O | X      
+     |   |
+  ---+---+---
+     |   |
+  ---+---+---
+     |   |
 
 
  todo:
    a cell can not marked twice
-   1 player vs computer.
    error when input invalid letter   
+   1 player vs computer.
+
 
 """
 
@@ -39,8 +28,15 @@ class Cell:
         return f' {self.mark} '
     
     def setMark(self, mark):
+        marked = False
+
+        if(self.isNotEmpty()):
+            print("Sorry, this cell is already marked ", self.mark)
+            return
         self.mark = mark
+        marked = True
         self.empty = False
+        return marked
     
     def isEmpty(self):
         return self.empty
@@ -61,17 +57,22 @@ class Row:
     
 
     def setMark(self, cellNum, markValue):
+        marked = False
         if(cellNum == 1):
-            self.cell1.setMark(markValue)
+            marked = self.cell1.setMark(markValue)
         elif(cellNum == 2):
-            self.cell2.setMark(markValue)
+            marked = self.cell2.setMark(markValue)
         else:
-            self.cell3.setMark(markValue)
+            marked = self.cell3.setMark(markValue)
+        return marked
 
     
     def win(self):
         isSomeBodyWin = (self.cell1.isNotEmpty()) and (self.cell1.mark == self.cell2.mark) and (self.cell2.mark == self.cell3.mark)
         return isSomeBodyWin
+    
+    def marked(self):
+        return self.cell1.isNotEmpty() and self.cell2.isNotEmpty() and self.cell3.isNotEmpty()
 
 
 class RowSeparator:
@@ -92,19 +93,25 @@ class Gameboard:
         return f'\n{self.row1}{self.rowSeparator}{self.row2}{self.rowSeparator}{self.row3}'
     
     def putMark(self, position, mark):
+        marked = False
         if(position < 4): 
-            self.row1.setMark(position, mark)
+            marked = self.row1.setMark(position, mark)
         elif(position < 7):
-            self.row2.setMark(position - 3,mark)
+            marked = self.row2.setMark(position - 3,mark)
         else:
-            self.row3.setMark(position - 6,mark)
-        
-        self.switch()
+            marked = self.row3.setMark(position - 6,mark)
 
+        if(marked): 
+            self.switch()
+        return marked
     
     def checkIfAnybodyWin(self):
         return self.row1.win() or self.row2.win() or self.row3.win() or self.sameC1() or self.sameC2() or self.sameC3() or self.diagonalWin() or self.diagonalWin2()
     
+    def checkAllMarked(self):
+        return self.row1.marked() and self.row2.marked() and self.row3.marked()
+    
+
     def sameC1(self) :
         return (self.row1.cell1.isNotEmpty()) and (self.row1.cell1.mark == self.row2.cell1.mark) and (self.row2.cell1.mark == self.row3.cell1.mark)
 
@@ -128,7 +135,7 @@ class Gameboard:
     # all is marked 
     # r1.c3 == r2.c2
     # r2.c2 == r3.c1
-    #
+    
     def diagonalWin2(self):
         return (self.row1.cell3.isNotEmpty()) and (self.row1.cell3.mark == self.row2.cell2.mark) and (self.row2.cell2.mark == self.row3.cell1.mark)
         
@@ -138,10 +145,24 @@ class Gameboard:
 
     def play(self): 
         position = input(f'It is {self.turn} which position you want to mark: ')
-        position = int(position)
-        self.putMark(position, self.turn)
+        isValid = False
+        marked = False
+        try:
+            position = int(position)
+            isValid = True
+        except:
+            isValid = False
+
+        
+        if(isValid): 
+            marked = self.putMark(position, self.turn)
         self.clean()
         print(self)
+
+        if(not isValid): 
+            print("Please select 1 - 9")
+        elif(not marked) :
+            print(f'Sorry, {position} is already marked.')
         
     def start(self) :
         self.clean()
@@ -150,6 +171,9 @@ class Gameboard:
             self.play()
             if(self.checkIfAnybodyWin()):
                 print(f'{self.lastTurn()}, U WIN!!!')
+                break
+            elif(self.checkAllMarked()):
+                print("It's a tie")
                 break
 
 
@@ -168,10 +192,11 @@ class Gameboard:
             return 'O'
         else:
             return 'X'
+        
 
     
 
 
 game = Gameboard()
-game.setPlayers()
+# game.setPlayers()
 game.start()
